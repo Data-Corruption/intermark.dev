@@ -1,18 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-  <defs>
-    <mask id="mask-hash-2">
-      <rect width="24" height="24" fill="black" />
-      <path d="M4 8h16 M4 16h16 M8 4v16 M16 4v16" stroke="white" stroke-width="2" stroke-linecap="butt" />
-      <circle cx="4" cy="8" r="2" fill="white" />
-      <circle cx="20" cy="8" r="2" fill="white" />
-      <circle cx="4" cy="16" r="2" fill="white" />
-      <circle cx="20" cy="16" r="2" fill="white" />
-      <circle cx="8" cy="4" r="2" fill="white" />
-      <circle cx="16" cy="4" r="2" fill="white" />
-      <circle cx="8" cy="20" r="2" fill="white" />
-      <circle cx="16" cy="20" r="2" fill="white" />
-    </mask>
-  </defs>
-  <rect width="24" height="24" rx="2" ry="2" fill="white" />
-  <rect width="24" height="24" rx="2" ry="2" fill="black" mask="url(#mask-hash-2)" />
-</svg>
+version https://git-lfs.github.com/spec/v1
+oid sha256:838852488a941ee31299152f06c0a294d2a17e12240c3c4f76b26c9a82d858bf
+size 881

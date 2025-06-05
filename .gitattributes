@@ -1,1 +1,2 @@
 assets/js/lunr.js linguist-detectable=false
+assets/** filter=lfs diff=lfs merge=lfs -text
