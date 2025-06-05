@@ -1,0 +1,147 @@
+{{define "sidebar"}}
+<style>
+  details[open]>summary>.folder-chevy {
+    transform: rotate(-90deg);
+  }
+</style>
+<ul id="_sidebar" class="menu[&_li>*]:rounded-none px-4 w-full select-none text-[0.9rem] [&>li]:border-l-0">
+  {{if .EditPage}}
+  {{template "add_btn"}}
+  {{end}}
+  {{range .Layout.Sidebar}}
+  {{template "sidebar_item" (dict "Item" . "Root" $)}}
+  {{end}}
+</ul>
+{{if not .Root.EditPage}}
+<script>
+  const sidebar = document.getElementById('_sidebar');
+  const currentPath = window.location.pathname;
+  sidebar.querySelectorAll('li > a').forEach(a => {
+    if (a.getAttribute('href') === currentPath) {
+      a.parentElement.classList.remove('border-base-content/50', 'text-base-content/80');
+      a.parentElement.classList.add('border-base-content', 'text-base-content');
+    }
+  });
+</script>
+{{end}}
+{{end}}
+
+{{define "sidebar_item"}}
+<!-- Divider -->
+{{if eq .Item.Type "divider"}}
+<li {{if .Root.EditPage}}draggable="true" {{template "sidebar_item_data" .Item}} {{end}}>
+  <div class="divider my-1">{{if .Root.EditPage}}<button class="btn btn-xs btn-ghost mx-auto" onclick="removeDivider(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4"><path fill-rule="evenodd"d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"clip-rule="evenodd" /></svg></button>{{end}}</div>
+</li>
+
+<!-- Non-link heading -->
+{{else if eq .Item.Type "label"}}
+<li {{if .Root.EditPage}}draggable="true" {{template "sidebar_item_data" .Item}} {{end}}
+  class="pl-0 py-1 align-self-center max-h-[2rem] border-l-1 border-base-content/50 text-base-content/80 font-medium">
+  <div class="p-0 pl-2 flex items-center gap-2">
+    {{if .Root.EditPage}}
+    {{template "edit_btn"}}
+    {{end}}
+    <div class="{{if not .Item.Icon}}hidden{{end}} sidebar-icon">{{.Item.Icon}}</div>
+    <span class="{{if .Item.Bold}}font-bold{{end}} text-base truncate">{{.Item.Label}}</span>
+  </div>
+</li>
+
+<!-- Folder -->
+{{else if eq .Item.Type "folder"}}
+{{if .Item.DisableCollapse}}
+<li {{if .Root.EditPage}}draggable="true" {{template "sidebar_item_data" .Item}} {{end}} class="p-0 my-3">
+  <div class="flex flex-row items-center gap-2 py-2 pl-2 hover:bg-base-100 max-h-[2.3rem] text-base-content/80">
+    {{if .Root.EditPage}}
+    {{template "edit_btn"}}
+    {{end}}
+    <div class="{{if not .Item.Icon}}hidden{{end}} sidebar-icon">{{.Item.Icon}}</div>
+    <span class="{{if .Item.Bold}}font-bold{{end}} text-base truncate">{{.Item.Label}}</span>
+  </div>
+  <ul class="list-none before:hidden p-0 my-1 ml-[1.2rem]">
+    {{if .Root.EditPage}}
+    {{template "add_btn"}}
+    {{end}}
+    {{$root := .Root}}
+    {{range .Item.Children}}
+    {{template "sidebar_item" (dict "Item" . "Root" $root)}}
+    {{end}}
+  </ul>
+</li>
+{{else}}
+<li {{if .Root.EditPage}}draggable="true" {{template "sidebar_item_data" .Item}} {{end}} class="my-3">
+  <details {{if not .Item.Collapsed}}open{{end}}>
+    <summary class="flex flex-row items-center gap-2 py-2 pl-2 max-h-[2.3rem] text-base-content/80">
+      {{if .Root.EditPage}}
+      {{template "edit_btn"}}
+      {{end}}
+      <div class="{{if not .Item.Icon}}hidden{{end}} sidebar-icon">{{.Item.Icon}}</div>
+      <span class="{{if .Item.Bold}}font-bold{{end}} text-base truncate">{{.Item.Label}}</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+        class="size-5 ml-auto folder-chevy transition-transform duration-200">
+        <path fill-rule="evenodd"
+          d="M7.72 12.53a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 1 1 1.06 1.06L9.31 12l6.97 6.97a.75.75 0 1 1-1.06 1.06l-7.5-7.5Z"
+          clip-rule="evenodd" />
+      </svg>
+    </summary>
+    <ul class="p-0 my-1 ml-[1.2rem]">
+      {{if .Root.EditPage}}
+      {{template "add_btn"}}
+      {{end}}
+      {{$root := .Root}}
+      {{range .Item.Children}}
+      {{template "sidebar_item" (dict "Item" . "Root" $root)}}
+      {{end}}
+    </ul>
+  </details>
+</li>
+{{end}}
+
+<!-- File or Link -->
+{{else}}
+<li {{if .Root.EditPage}}draggable="true" {{template "sidebar_item_data" .Item}} {{end}}
+  class="pl-0 py-1 align-self-center max-h-[2rem] border-l-1 border-base-content/50 hover:border-base-content text-base-content/80 hover:text-base-content font-medium">
+  <a href="{{.Item.Link}}"
+    class="p-0 pl-2 flex flex-row items-center gap-2 hover:bg-base-100" target="_blank" rel="noopener noreferrer">
+    {{if .Root.EditPage}}
+    {{template "edit_btn"}}
+    {{end}}
+    <div class="{{if not .Item.Icon}}hidden{{end}} sidebar-icon">{{.Item.Icon}}</div>
+    <span class="{{if .Item.Bold}}font-bold{{end}} text-base truncate">{{.Item.Label}}</span>
+  </a>
+</li>
+{{end}}
+{{end}}
+
+{{define "sidebar_item_data"}}
+data-type="{{.Type}}"
+data-label="{{.Label}}"
+data-bold="{{.Bold}}"
+data-template="{{.Template}}"
+data-collapsed="{{.Collapsed}}"
+data-disablecollapse="{{.DisableCollapse}}"
+data-link="{{.Link}}"
+data-path="{{.Path}}"
+{{end}}
+
+{{define "edit_btn"}}
+<button class="btn btn-xs btn-square" onclick="event.stopPropagation(); event.preventDefault(); editModal(this)">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+    <path
+      d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+    <path
+      d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+  </svg>
+</button>
+{{end}}
+
+{{define "add_btn"}}
+<li class="add-btn">
+  <button class="btn btn-xs btn-wide mb-2" onclick="addModal(this)">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+      <path fill-rule="evenodd"
+        d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z"
+        clip-rule="evenodd" />
+    </svg>
+  </button>
+</li>
+{{end}}

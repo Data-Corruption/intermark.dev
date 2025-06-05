@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ .Layout.Title }}</title>
+  <link rel="icon" href="{{ .Layout.IconHref }}" type="{{ .Layout.IconType }}">
+  <link rel="stylesheet" href="/assets/css/out.css">
+  <script src="/assets/js/utils.js"></script>
+  {{template "shiki" .}}
+</head>
+
+<body>
+  <div class="bg-base-100 font-inter">
+    {{ .Content }}
+  </div>
+</body>
+
+</html>

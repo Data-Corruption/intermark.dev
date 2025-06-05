@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ .Layout.Title }}</title>
+  <link rel="icon" href="{{ .Layout.IconHref }}" type="{{ .Layout.IconType }}">
+  <link rel="stylesheet" href="/assets/css/out.css">
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/lunr.js"></script>
+  <script src="/assets/js/toc.js"></script>
+  {{template "shiki" .}}
+</head>
+
+<body>
+  <div class="bg-base-100 font-inter">
+    {{template "navbar_with_drawer_btn" .}}
+    <div class="drawer lg:drawer-open">
+      <input id="_drawer" type="checkbox" class="drawer-toggle" />
+
+      <div id="_main" class="drawer-content mt-10 flex w-full px-4">
+        <div class="flex-1 hidden lg:block"></div>
+
+        <div class="flex w-full max-w-screen-lg mx-auto lg:mx-0 gap-8 px-4 sm:px-6 lg:px-0">
+          <main class="flex-1 max-w-none min-w-0 mb-[50vh]">
+            <div id="_content" class="prose max-w-none w-full mb-8">
+              {{ .Content }}
+            </div>
+            {{ .Layout.Footer }}
+          </main>
+          <aside class="hidden xl:block w-64 flex-shrink-0">
+            <div class="sticky top-26 h-[calc(100vh-8rem)] overflow-y-auto pr-4">
+              <div class="text-sm font-bold mb-4 text-base-content/75">On This Page</div>
+              <div id="_toc" class="text-sm"></div>
+            </div>
+          </aside>
+        </div>
+
+        <div class="flex-1 hidden lg:block"></div>
+      </div>
+
+      <div class="drawer-side lg:sticky top-16 lg:z-60 border-r-2 border-base-200">
+        <label for="_drawer" class="drawer-overlay"></label>
+        <aside class="bg-base-100 h-[93vh] w-72 pt-4 overflow-y-auto">
+          {{template "sidebar" .}}
+        </aside>
+      </div>
+    </div>
+    {{template "scrollToTopBtn" .}}
+    {{template "searchModal" .}}
+  </div>
+  <script>
+    const main = document.getElementById('_main');
+    buildToc(main)
+  </script>
+</body>
+
+</html>

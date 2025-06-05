@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+@plugin "daisyui" {
+  themes: all;
+  exclude: rootscrollgutter;
+}
+
+@plugin "daisyui/theme" {
+  name: "nord";
+  color-scheme: "light";
+  --color-base-content: oklch(20% 0.042 265.755);
+}
+
+@plugin "daisyui/theme" {
+  name: "night";
+  color-scheme: "dark";
+  --color-base-content: oklch(96% 0.007 247.896);
+}
+
+@layer base {
+  /* --- Inter Font --- */
+  @font-face {
+    font-family: 'InterVariable';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/assets/fonts/InterVariable.woff2') format('woff2');
+  }
+
+  @font-face {
+    font-family: 'InterVariable';
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/assets/fonts/InterVariable-Italic.woff2') format('woff2');
+  }
+}
+
+@layer components {
+  .font-inter {
+    font-family: 'InterVariable', theme('fontFamily.sans');
+  }
+}

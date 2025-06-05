@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit</title>
+  <link rel="icon" href="{{ .Layout.IconHref }}" type="{{ .Layout.IconType }}">
+  <link rel="stylesheet" href="/assets/css/out.css">
+  <script src="/assets/js/utils.js"></script>
+</head>
+
+<body class="overflow-y-clip">
+  <div class="bg-base-100 font-inter">
+    {{template "navbar_with_drawer_btn" .}}
+    <div class="drawer lg:drawer-open">
+      <input id="_drawer" type="checkbox" class="drawer-toggle" />
+      <div id="_main" class="drawer-content p-10 flex w-full">
+        <div class="flex flex-col space-y-4 w-full max-w-screen-md">
+          <!-- inline icon -->
+          <div>
+            <h2 class="text-lg font-bold mb-2">Inline Icon</h2>
+            <div class="grid grid-cols-2">
+              <div class="p-6 border bg-base-300">
+                <h3 class="text-sm font-bold mb-2">Input</h3>
+                <textarea class="textarea my-auto overflow-x-scroll whitespace-pre" wrap="off"
+                  id="edit_inline_icon_input">{{.Layout.InlineIcon}}</textarea>
+              </div>
+              <div class="p-6 border bg-base-300">
+                <h3 class="text-sm font-bold mb-2">Preview</h3>
+                <div class="w-full h-full" id="edit_inline_icon_output">
+                  {{.Layout.InlineIcon}}
+                </div>
+              </div>
+              <script>
+                const inlineIconInput = document.getElementById('edit_inline_icon_input');
+                const inlineIconOutput = document.getElementById('edit_inline_icon_output');
+                inlineIconInput.addEventListener('input', function (event) {
+                  inlineIconOutput.innerHTML = event.target.value;
+                });
+              </script>
+            </div>
+          </div>
+          <!-- title -->
+          <div>
+            <h2 class="text-lg font-bold mb-2">Title</h2>
+            <input id="edit_title" type="text" class="input" value="{{.Layout.Title}}" />
+          </div>
+          <!-- index tmpl -->
+          <div>
+            <h2 class="text-lg font-bold mb-2">Index Template</h2>
+            <select class="select" id="edit_index_template">
+              <option value="page-nav-side-toc.html">Navbar + Sidebar + TOC</option>
+              <option value="page-nav-side.html">Navbar + Sidebar</option>
+              <option value="page-nav.html">Navbar</option>
+              <option value="page.html">Blank</option>
+            </select>
+            <script>
+              const indexTemplate = "{{.Layout.IndexTmpl}}";
+              const ts = document.getElementById('edit_index_template');
+              for (const option of ts.options) {
+                if (option.value === indexTemplate) {
+                  option.selected = true;
+                }
+              }
+            </script>
+          </div>
+          <!-- save btn -->
+          <div class="mt-8">
+            <button class="btn btn-primary" id="save_main_sidebar" onclick="updateSidebar()">Save</button>
+          </div>
+        </div>
+      </div>
+      <div class="drawer-side lg:sticky top-16 lg:z-60 border-r-2 border-base-200">
+        <label for="_drawer" class="drawer-overlay"></label>
+        <aside class="bg-base-100 max-h-[93vh] w-72 pt-4 overflow-y-auto">
+          <div id="sidebar_wrapper">{{template "sidebar" .}}</div>
+        </aside>
+      </div>
+    </div>
+  </div>
+  <dialog id="add_modal" class="modal font-inter">
+    <div class="modal-box">
+      <h2 class="text-lg font-bold">Insert Non-filesystem Item</h2>
+      <select id="nfi_type" class="select my-2">
+        <option value="label">Label</option>
+        <option value="link">Link</option>
+        <option value="divider">Divider</option>
+      </select>
+      <form method="dialog flex flex-row gap-2">
+        <button id="add_item" class="btn">Add</button>
+        <button class="btn" onclick="event.preventDefault(); add_modal.close()">Cancel</button>
+      </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+  <dialog id="edit_modal" class="modal font-inter">
+    <div class="modal-box bg-base-200">
+      <h3 class="text-sm font-bold">Editing: <span id="edit_type"></span></h3>
+      <h2 class="hidden text-lg font-bold" id="edit_path"></h2>
+      <div class="divider mt-5"></div>
+      <div class="flex flex-col gap-4 mb-8">
+        <div>
+          <h2 class="text-lg font-bold mb-2">Icon</h2>
+          <div class="tabs tabs-lift">
+            <input type="radio" name="icon_tabs" class="tab" aria-label="Input" checked="checked" />
+            <div class="tab-content border-base-300 p-0">
+              <textarea class="textarea w-full h-full overflow-x-scroll whitespace-pre" wrap="off"
+                id="edit_icon_input"></textarea>
+            </div>
+            <input type="radio" name="icon_tabs" class="tab" aria-label="Preview" />
+            <div class="tab-content w-full h-full border-base-300 p-0" id="edit_icon_output"></div>
+          </div>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold">Label</h2>
+          <div class="flex flex-row gap-4">
+            <input type="text" placeholder="" class="input" id="edit_label" />
+            <label class="label">
+              <input type="checkbox" class="checkbox" id="edit_bold" />
+              Bold
+            </label>
+          </div>
+        </div>
+        <div class="hidden" id="edit_folder_options">
+          <h2 class="text-lg font-bold mb-2">Folder Options</h2>
+          <label class="label mr-2">
+            <input type="checkbox" class="checkbox" id="edit_collapsed" />
+            Collapsed By Default
+          </label>
+          <label class="label">
+            <input type="checkbox" class="checkbox" id="edit_DisableCollapse" />
+            Disable Collapse
+          </label>
+        </div>
+        <div class="hidden" id="edit_file_options">
+          <h2 class="text-lg font-bold mb-2">Template</h2>
+          <select class="select" id="edit_template">
+            <option value="page-nav-side-toc.html">Navbar + Sidebar + TOC</option>
+            <option value="page-nav-side.html">Navbar + Sidebar</option>
+            <option value="page-nav.html">Navbar</option>
+            <option value="page.html">Blank</option>
+          </select>
+        </div>
+        <div class="hidden" id="edit_link_options">
+          <h2 class="text-lg font-bold mb-2">Link</h2>
+          <input type="text" placeholder="" class="input mb-2" id="edit_link" />
+        </div>
+      </div>
+      <form method="dialog flex flex-row gap-2">
+        <button id="edit_save" class="btn btn-primary">Update</button>
+        <button id="edit_delete" class="btn btn-error">Delete</button>
+        <button class="btn btn-primary" onclick="event.preventDefault(); edit_modal.close()">Cancel</button>
+      </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+  <div id="click-blocker"
+    class="fixed inset-0 bg-black bg-opacity-25 z-100 items-center justify-center cursor-wait hidden">
+    <span class="loading loading-spinner loading-lg text-white"></span>
+  </div>
+  <script>
+    // equals nonsense so tmpl syntax isn't caught by standard html linters
+    const debug = ("{{.Debug}}" === "true");
+    function log(...args) {
+      if (debug) {
+        console.log(...args);
+      }
+    }
+
+    function postJsonAndReplace(selector, url, data, timeoutMs = 8000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      return fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        signal: controller.signal,
+      })
+        .finally(() => clearTimeout(timer))
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.text();
+        })
+        .then(html => {
+          const el = document.querySelector(selector);
+          if (!el) throw new Error(`No element matches ${selector}`);
+          el.innerHTML = html;
+        });
+    }
+
+    // --- build sidebar ---
+
+    function extractSidebarItems(root = document.getElementById('_sidebar')) {
+      const items = [];
+
+      let position = 1;
+      for (const li of root.children) {
+        // if has class 'add-btn' skip
+        if (li.classList.contains('add-btn')) {
+          continue;
+        }
+
+        const base = {
+          Type: li.dataset.type,
+          Icon: '',
+          Label: li.dataset.label,
+          Bold: li.dataset.bold === 'true',
+          Template: li.dataset.template,
+          Collapsed: li.dataset.collapsed === 'true',
+          DisableCollapse: li.dataset.disablecollapse === 'true',
+          Link: li.dataset.link,
+          Path: li.dataset.path,
+          Position: position,
+        };
+        position++;
+
+        if (base.Type === 'folder') {
+          const children = li.querySelector('ul');
+          if (children) {
+            base.Children = extractSidebarItems(children);
+          } else {
+            base.Children = [];
+          }
+        }
+
+        if ((base.Type !== 'divider') && (li.dataset.new !== 'true')) {
+          let icon = li.querySelector('.sidebar-icon');
+          if (!icon) {
+            log('No icon found for', li);
+            throw new Error('No icon found');
+          }
+          base.Icon = icon.innerHTML;
+        }
+
+        items.push(base);
+      }
+
+      return items;
+    }
+
+    function updateSidebar() {
+      let sb = null;
+      try {
+        sb = extractSidebarItems();
+      } catch (error) {
+        log('Error extracting sidebar items:', error);
+        alert('Error extracting sidebar items. Please check the console for details.');
+        return;
+      }
+      blockClicks();
+
+      const inlineIcon = document.getElementById('edit_inline_icon_input').value;
+      const title = document.getElementById('edit_title').value;
+      const indexTemplate = document.getElementById('edit_index_template').value;
+
+      navicon = document.getElementById('nav_inline_icon');
+      navicon.innerHTML = inlineIcon;
+      navicon.classList.remove('hidden');
+      if (inlineIcon.trim() === '') {
+        navicon.classList.add('hidden');
+      }
+
+      document.getElementById('nav_title').innerText = title;
+
+      const layout = {
+        Title: title,
+        InlineIcon: inlineIcon,
+        IndexTmpl: indexTemplate,
+        Sidebar: sb,
+      }
+
+      postJsonAndReplace('#sidebar_wrapper', '/edit-sidebar', layout)
+        .then(() => { unblockClicks(); console.log('Updated results') })
+        .catch(err => {
+          unblockClicks();
+          if (err.name === 'AbortError') {
+            alert('Request timed out, is the server running?');
+          } else {
+            alert('Request failed, try refreshing:', err);
+          }
+        });
+    }
+
+    function removeDivider(btn) {
+      const divider = btn.closest('li');
+      if (divider) {
+        divider.remove();
+      }
+      updateSidebar();
+    }
+
+    // ---- add modal ----
+
+    let addTarget = null;
+    function addModal(btn) {
+      addTarget = btn.closest('ul');
+      log('addTarget:', addTarget);
+      add_modal.showModal();
+    }
+    const addItemBtn = document.getElementById('add_item');
+    addItemBtn.addEventListener('click', function (event) {
+      event.preventDefault();
+      const select = document.getElementById('nfi_type');
+      const selected = select.options[select.selectedIndex];
+      log('addItemBtn:', selected);
+
+      let path = '';
+      let parent = addTarget.closest('li[data-type="folder"]');
+      if (parent) {
+        path = parent.dataset.path;
+      }
+
+      const li = document.createElement('li');
+      li.classList.add('hidden');
+      li.setAttribute('data-new', true);
+      li.setAttribute('data-type', selected.value);
+      li.setAttribute('data-path', path);
+      if (selected.value !== 'divider') {
+        li.setAttribute('data-label', `New ${selected.label}`);
+      }
+      addTarget.appendChild(li);
+      updateSidebar();
+      add_modal.close();
+    });
+
+    // ---- edit modal ----
+
+    const iconInput = document.getElementById('edit_icon_input');
+    const iconOutput = document.getElementById('edit_icon_output');
+    iconInput.addEventListener('input', function (event) {
+      const value = event.target.value;
+      iconOutput.innerHTML = value;
+    });
+
+    const editDeleteBtn = document.getElementById('edit_delete');
+
+    let editTarget = null;
+    function editModal(btn) {
+      editTarget = btn.closest('[data-type]');
+      log('editTarget:', editTarget);
+      if (!editTarget) return;
+
+      const typeDisplay = document.getElementById('edit_type');
+      const pathDisplay = document.getElementById('edit_path');
+      const labelInput = document.getElementById('edit_label');
+
+      const folderOptions = document.getElementById('edit_folder_options');
+      const fileOptions = document.getElementById('edit_file_options');
+      const linkOptions = document.getElementById('edit_link_options');
+
+      // reset
+      pathDisplay.classList.add('hidden');
+      folderOptions.classList.add('hidden');
+      fileOptions.classList.add('hidden');
+      linkOptions.classList.add('hidden');
+
+      // populate the modal
+      const type = editTarget.dataset.type;
+      const label = editTarget.dataset.label;
+      typeDisplay.innerText = type;
+      labelInput.value = label;
+
+      const boldCheckbox = document.getElementById('edit_bold');
+      boldCheckbox.checked = editTarget.dataset.bold === 'true';
+
+      icon = editTarget.querySelector('.sidebar-icon');
+      if (icon) {
+        iconInput.value = icon.innerHTML;
+        iconOutput.innerHTML = icon.innerHTML;
+      } else {
+        iconInput.value = '';
+        iconOutput.innerHTML = '';
+      }
+
+      if ((type === 'folder') || (type === 'file')) {
+        pathDisplay.innerText = editTarget.dataset.path;
+        pathDisplay.classList.remove('hidden');
+        editDeleteBtn.classList.add('hidden');
+      } else {
+        editDeleteBtn.classList.remove('hidden');
+      }
+
+      if (type === 'folder') {
+        folderOptions.classList.remove('hidden');
+        const collapsedCheckbox = document.getElementById('edit_collapsed');
+        const disableCollapseCheckbox = document.getElementById('edit_DisableCollapse');
+        collapsedCheckbox.checked = editTarget.dataset.collapsed === 'true';
+        disableCollapseCheckbox.checked = editTarget.dataset.disablecollapse === 'true';
+      } else if (type === 'file') {
+        fileOptions.classList.remove('hidden');
+        const ts = document.getElementById('edit_template');
+        const template = editTarget.dataset.template;
+        ts.value = template;
+        log('template:', template);
+        for (const option of ts.options) {
+          if (option.value === template) {
+            option.selected = true;
+          }
+        }
+      } else if (type === 'link') {
+        linkOptions.classList.remove('hidden');
+        const linkInput = document.getElementById('edit_link');
+        const link = editTarget.dataset.link;
+        linkInput.value = link;
+      }
+
+      edit_modal.showModal();
+    }
+
+    editDeleteBtn.addEventListener('click', function (event) {
+      event.preventDefault();
+      log('editDeleteBtn:', editTarget);
+      if (!editTarget) return;
+
+      // remove the target
+      const parent = editTarget.parentElement;
+      if (parent) {
+        parent.removeChild(editTarget);
+        updateSidebar();
+        edit_modal.close();
+      }
+    });
+
+    const editSaveBtn = document.getElementById('edit_save');
+    editSaveBtn.addEventListener('click', function (event) {
+      event.preventDefault();
+      log('editSaveBtn:', editTarget);
+      if (!editTarget) return;
+
+      // update the target
+      const type = editTarget.dataset.type;
+      if (type === 'folder') {
+        const collapsedCheckbox = document.getElementById('edit_collapsed');
+        const disableCollapseCheckbox = document.getElementById('edit_DisableCollapse');
+        editTarget.dataset.collapsed = collapsedCheckbox.checked ? 'true' : 'false';
+        editTarget.dataset.disablecollapse = disableCollapseCheckbox.checked ? 'true' : 'false';
+      } else if (type === 'file') {
+        editTarget.dataset.template = document.getElementById('edit_template').value;
+      } else if (type === 'link') {
+        editTarget.dataset.link = document.getElementById('edit_link').value;
+      }
+
+      // update the label
+      const newLabel = document.getElementById('edit_label').value;
+      if (newLabel !== editTarget.dataset.label) {
+        editTarget.dataset.label = newLabel;
+      }
+
+      // update the icon
+      const newIcon = document.getElementById('edit_icon_input').value;
+      editTarget.querySelector('.sidebar-icon').innerHTML = newIcon;
+
+      // update bold
+      editTarget.dataset.bold = document.getElementById('edit_bold').checked ? 'true' : 'false';
+
+      updateSidebar();
+      edit_modal.close();
+    });
+
+    // ---- drag and drop system ----
+
+    let dragged = null;
+
+    function clearDropClasses() {
+      document.querySelectorAll('[data-type]').forEach(item => {
+        item.classList.remove('border-t-4', 'border-b-4', 'bg-primary', 'border-primary');
+      });
+    };
+
+    document.addEventListener('dragstart', function (event) {
+      event.stopPropagation();
+      let target = event.target.closest('[draggable]');
+      log('dragstart:', target);
+      if (target) {
+        dragged = target;
+        event.dataTransfer.setData('text/plain', null); // for browser compatibility
+      }
+    });
+
+    // returns true if target is in same parent as dragged, and not itself
+    function validMove(target) {
+      log('dragover:', target);
+      if (!target) return false;
+      if (dragged == target) return false;
+      if (!target.parentElement) return false;
+      if (dragged.parentElement != target.parentElement) return false;
+      return true;
+    }
+
+    document.addEventListener('dragover', function (event) {
+      if (!dragged) { return; }
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+
+      const targetItem = event.target.closest('[data-type]');
+      if (!validMove(targetItem)) return;
+
+      // vars for above, below check
+      const rect = targetItem.getBoundingClientRect();
+      const halfHeight = rect.height / 2;
+      const yPos = event.clientY;
+
+      // action is either 'drop-above', 'drop-below'
+      const applyAction = (targetItem, action) => {
+        clearDropClasses();
+        switch (action) {
+          case 'drop-above': targetItem.classList.add('border-t-4', 'border-primary'); break;
+          case 'drop-below': targetItem.classList.add('border-b-4', 'border-primary'); break;
+          default: break;
+        }
+        targetItem.dataset.dropAction = action;
+      };
+
+      if (yPos < rect.top + halfHeight) {
+        applyAction(targetItem, 'drop-above');
+      } else if (yPos > rect.bottom - halfHeight) {
+        applyAction(targetItem, 'drop-below');
+      }
+    });
+
+    document.addEventListener('drop', function (event) {
+      if (!dragged) { return; }
+      event.preventDefault();
+      clearDropClasses();
+
+      const targetItem = event.target.closest('[data-type]');
+      if (!validMove(targetItem)) return;
+
+      let action = targetItem.dataset.dropAction;
+      if (!action) return;
+      let ul = targetItem.parentElement;
+      if (ul.tagName !== 'UL') {
+        log('targetItem parent is not a UL');
+        return;
+      }
+      switch (action) {
+        case 'drop-above': ul.insertBefore(dragged, targetItem); break;
+        case 'drop-below': ul.insertBefore(dragged, targetItem.nextSibling); break;
+      }
+      dragged = null;
+
+      updateSidebar();
+    });
+
+  </script>
+</body>
+
+</html>
