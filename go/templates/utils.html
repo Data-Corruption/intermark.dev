@@ -1,0 +1,256 @@
+{{define "navbar_with_drawer_btn"}}
+{{template "_navbar_1" .}}
+<div class="flex-none">
+  <span class="tooltip tooltip-bottom before:text-xs before:content-[attr(data-tip)]" data-tip="Menu">
+    <label aria-label="Open menu" for="_drawer" class="btn btn-square btn-ghost drawer-button lg:hidden mr-4">
+      <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+        class="inline-block h-6 w-6 stroke-current">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+        </path>
+      </svg>
+    </label>
+  </span>
+</div>
+{{template "_navbar_2" .}}
+{{end}}
+
+{{define "navbar"}}
+{{template "_navbar_1" .}}
+{{template "_navbar_2" .}}
+{{end}}
+
+{{define "_navbar_1"}}
+<div
+  class="navbar h-14 bg-base-100/90 sticky top-0 z-50 px-4 justify-center backdrop-blur transition-shadow duration-100 print:hidden border-b-2 border-base-200">
+  {{end}}
+
+  {{define "_navbar_2"}}
+  <div class="flex-none">
+    <a class="text-xl cursor-pointer font-extrabold tracking-tight flex flex-row gap-2 items-center" href="/"
+      aria-label="Home" target="_blank" rel="noopener noreferrer">
+      <div id="nav_inline_icon" class="{{ if not .Layout.InlineIcon }}hidden{{end}} size-7 flex items-center justify-center overflow-hidden">
+        {{ .Layout.InlineIcon }}
+      </div>
+      <div id="nav_title">
+        {{ .Layout.Title }}
+      </div>
+    </a>
+  </div>
+  <div class="grow"></div>
+  <div class="flex-none flex flex-row gap-2 items-center">
+    <div class="{{if .EditMode }}tooltip tooltip-left{{end}}" data-tip="Disabled in edit mode">
+      <button class="btn btn-sm {{if .EditMode }}btn-disabled{{end}}" onclick="search_modal.showModal()">
+        <svg class="size-5 opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </g>
+        </svg>
+        <div class="hidden sm:block">
+          <kbd class="kbd kbd-sm">ctrl</kbd>
+          <kbd class="kbd kbd-sm">K</kbd>
+        </div>
+      </button>
+    </div>
+    <div class="dropdown dropdown-bottom dropdown-end">
+      <div tabindex="0" role="button" class="btn btn-sm">
+        <div class="bg-base-100 grid shrink-0 grid-cols-2 gap-0.5 p-1 shadow-sm">
+          <div class="bg-base-content size-1 rounded-full"></div>
+          <div class="bg-primary size-1 rounded-full"></div>
+          <div class="bg-secondary size-1 rounded-full"></div>
+          <div class="bg-accent size-1 rounded-full"></div>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+          <path fill-rule="evenodd"
+            d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+            clip-rule="evenodd" />
+        </svg>
+      </div>
+      <ul id="themes" tabindex="0"
+        class="dropdown-content menu bg-base-100 rounded-box w-52 z-60 p-2 mt-4 shadow-sm h-[32rem] overflow-y-auto overflow-x-hidden flex flex-col flex-nowrap">
+        {{ range .Themes }}
+        <li>
+          <button class="btn gap-3 px-2" data-set-theme="{{ . }}" data-act-class="[&amp;_svg]:visible">
+            <div data-theme="{{ . }}" class="bg-base-100 grid shrink-0 grid-cols-2 gap-0.5 p-1 shadow-sm">
+              <div class="bg-base-content size-1 rounded-full"></div>
+              <div class="bg-primary size-1 rounded-full"></div>
+              <div class="bg-secondary size-1 rounded-full"></div>
+              <div class="bg-accent size-1 rounded-full"></div>
+            </div>
+            <div class="w-30 truncate text-left">{{ . }}</div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+              class="invisible theme-checkmark h-3 w-3 shrink-0">
+              <path d="M20.285 2l-11.285 11.567-5.286-5.011-3.714 3.716 9 8.728 15-15.285z"></path>
+            </svg>
+          </button>
+        </li>
+        {{ end }}
+      </ul>
+    </div>
+  </div>
+</div>
+{{end}}
+
+{{define "scrollToTopBtn"}}
+<div class="lg:hidden toast btn btn-lg btn-circle btn-outline z-50"
+  onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+    <path fill-rule="evenodd"
+      d="M9.47 6.47a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 1 1-1.06 1.06L10 8.06l-3.72 3.72a.75.75 0 0 1-1.06-1.06l4.25-4.25Z"
+      clip-rule="evenodd" />
+  </svg>
+</div>
+{{end}}
+
+{{define "searchModal"}}
+<dialog id="search_modal" class="modal">
+  <div class="modal-box w-11/12 max-w-5xl h-[50vh] relative p-0">
+    <div class="sticky top-0 z-10 bg-base-100 p-4">
+      <label class="input w-full">
+        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </g>
+        </svg>
+        <input id="search_input" class="w-full" type="search" required placeholder="Search" />
+        <div class="divider"></div>
+      </label>
+    </div>
+    <div class="m-4">
+      <ul id="search_results" class="text-sm"></ul>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+<script>
+  var idx = null;
+  document.addEventListener('keydown', function (event) {
+    if (event.ctrlKey && event.key === 'k') {
+      event.preventDefault();
+      search_modal.showModal();
+      const search_input = document.getElementById('search_input');
+    }
+  });
+  function performSearch(query) {
+    const results = idx.search(query);
+    const container = document.getElementById('search_results');
+    container.innerHTML = ''; // clear
+
+    if (!results.length) {
+      container.innerHTML = '<li class="text-sm">No results found.</li>';
+      return;
+    }
+
+    // helper to escape regex chars in query
+    function escapeRegExp(str) {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    // build a case‑insensitive regex once
+    const re = new RegExp(`(${escapeRegExp(query)})`, 'i');
+
+    // bucket by page
+    const pages = {};
+    results.forEach(({ ref }) => {
+      const [page, anchor] = ref.split('#');
+      if (!pages[page]) pages[page] = [];
+      pages[page].push(anchor ? `${page}#${anchor}` : page);
+    });
+
+    // render each page block
+    Object.entries(pages).forEach(([page, refs]) => {
+      const block = document.createElement('div');
+      block.className = 'mb-6';
+
+      const heading = document.createElement('h3');
+      heading.className = 'font-semibold text-lg mb-2';
+      heading.textContent = page;
+      block.appendChild(heading);
+
+      const ul = document.createElement('ul');
+      refs.forEach(fullRef => {
+        const [base, anchor] = fullRef.split('#');
+        const display = anchor || fullRef;  // e.g. "getting-started"
+        const li = document.createElement('li');
+        li.className = 'text-sm';
+
+        const a = document.createElement('a');
+        a.className = 'link link-hover';
+        a.href = (base === '/') ? fullRef : `/p/${fullRef}`;
+
+        // wrap matching substring in <strong>
+        const highlighted = display.replace(re, `<strong>$1</strong>`);
+        a.innerHTML = `#${highlighted}`;
+
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+
+      block.appendChild(ul);
+      container.appendChild(block);
+    });
+  }
+  // handle search input
+  const search_input = document.getElementById('search_input');
+  search_input.addEventListener('input', function (event) {
+    const query = event.target.value;
+    if (query.length > 0) {
+      if (!idx) {
+        // load Lunr.js index
+        fetch('/search.json')
+          .then(response => response.json())
+          .then(data => {
+            idx = lunr.Index.load(data.index);
+            performSearch(query);
+          });
+      } else {
+        performSearch(query);
+      }
+    } else {
+      // clear search results if the input is empty
+      document.getElementById('search_results').innerHTML = '';
+    }
+  });
+</script>
+{{end}}
+
+{{define "shiki"}}
+<script type="module">
+  import { codeToHtml } from 'https://esm.sh/shiki@3.4.2'
+  const copySVG = `<svg class="fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M 16 3 C 14.742188 3 13.847656 3.890625 13.40625 5 L 6 5 L 6 28 L 26 28 L 26 5 L 18.59375 5 C 18.152344 3.890625 17.257813 3 16 3 Z M 16 5 C 16.554688 5 17 5.445313 17 6 L 17 7 L 20 7 L 20 9 L 12 9 L 12 7 L 15 7 L 15 6 C 15 5.445313 15.445313 5 16 5 Z M 8 7 L 10 7 L 10 11 L 22 11 L 22 7 L 24 7 L 24 26 L 8 26 Z"></path></svg>`;
+  const copiedSVG = `<svg class="fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M 16 2 C 14.742188 2 13.847656 2.890625 13.40625 4 L 5 4 L 5 29 L 27 29 L 27 4 L 18.59375 4 C 18.152344 2.890625 17.257813 2 16 2 Z M 16 4 C 16.554688 4 17 4.445313 17 5 L 17 6 L 20 6 L 20 8 L 12 8 L 12 6 L 15 6 L 15 5 C 15 4.445313 15.445313 4 16 4 Z M 7 6 L 10 6 L 10 10 L 22 10 L 22 6 L 25 6 L 25 27 L 7 27 Z M 21.28125 13.28125 L 15 19.5625 L 11.71875 16.28125 L 10.28125 17.71875 L 14.28125 21.71875 L 15 22.40625 L 15.71875 21.71875 L 22.71875 14.71875 Z"></path></svg>`;
+  async function codeBlock(target, code, lang) {
+    const element = document.getElementById(target);
+    if (!element) return;
+    element.innerHTML = await codeToHtml(code, { lang, theme: 'github-dark' });
+    const pre = document.querySelector(`#${target} pre`);
+    if (!pre) return;
+    // hover: reveal copy button in top right corner
+    pre.classList.add('relative', 'group');
+    if (!pre.querySelector('.copy-btn')) {
+      const copyButton = document.createElement('button');
+      copyButton.innerHTML = copySVG;
+      copyButton.className = 'copy-btn size-6 hidden group-hover:block btn btn-square btn-secondary absolute top-2 right-2 z-50';
+      copyButton.onclick = () => {
+        navigator.clipboard.writeText(code);
+        copyButton.innerHTML = copiedSVG;
+        setTimeout(() => {
+          copyButton.innerHTML = copySVG;
+        }, 2000);
+      };
+      pre.appendChild(copyButton);
+    }
+    // hover: hide bold language name
+    if (!pre.querySelector('.language')) {
+      const languageSpan = document.createElement('span');
+      languageSpan.className = 'language block group-hover:hidden font-bold text-xs text-base-content absolute top-2 right-2 bg-base-200 px-1 rounded';
+      languageSpan.textContent = lang;
+      pre.appendChild(languageSpan);
+    }
+  };
+  window.codeBlock = codeBlock;
+</script>
+{{end}}

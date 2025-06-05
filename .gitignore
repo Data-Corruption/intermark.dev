@@ -1,0 +1,12 @@
+
+bin/
+logs/
+todo.md
+assets/css/out.css
+public/.meta/dist/
+public/.meta/search-index.json
+public/.meta/search-pre-index.json
+public/.meta/app.dist.css
+
+.vscode/
+node_modules/

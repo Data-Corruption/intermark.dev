@@ -1,0 +1,11 @@
+{
+  "name": "dummy",
+  "version": "1.0.0",
+  "description": "dummy project for tailwind/daisyui",
+  "devDependencies": {
+    "tailwindcss": "^4.1.3",
+    "@tailwindcss/cli": "^4.1.3",
+    "@tailwindcss/typography": "^0.5.16",
+    "daisyui": "^5.0.19"
+  }
+}

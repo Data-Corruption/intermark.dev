@@ -1,0 +1,70 @@
+image: atlassian/default-image:2
+
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Deploy
+          script:
+            - if [ -z "$SERVER_ADDRESS" ]; then
+                echo "Warning: SERVER_ADDRESS is not set or is empty"; exit 0;
+              fi
+            - if [ -z "$UPDATE_TOKEN" ]; then
+                echo "Warning: UPDATE_TOKEN is not set or is empty"; exit 0;
+              fi
+            - |
+              response=$(
+                curl -X POST -sS -o /dev/null -w "%{http_code}" --insecure \
+                  "$SERVER_ADDRESS/update" \
+                  -H "Content-Type: text/plain" \
+                  -d "$UPDATE_TOKEN" \
+                  --max-time 10
+              )
+            - |
+              if [[ $response == 2* ]]; then
+                echo "Token sent successfully"
+              else
+                echo "Failed to send token. HTTP status code: $response"; exit 1;
+              fi
+            - |
+              scheme=$(
+                curl -sS -o /dev/null -w "%{scheme}" --insecure "$SERVER_ADDRESS"
+              )
+            - |
+              if [[ $scheme != "https" ]]; then
+                echo "Warning: Server is not using HTTPS. Communication is not encrypted."
+              fi
+
+  custom:
+    manual-deploy:
+      - step:
+          name: Deploy (manual)
+          script:
+            - if [ -z "$SERVER_ADDRESS" ]; then
+                echo "Warning: SERVER_ADDRESS is not set or is empty"; exit 0;
+              fi
+            - if [ -z "$UPDATE_TOKEN" ]; then
+                echo "Warning: UPDATE_TOKEN is not set or is empty"; exit 0;
+              fi
+            - |
+              response=$(
+                curl -X POST -sS -o /dev/null -w "%{http_code}" --insecure \
+                  "$SERVER_ADDRESS/update" \
+                  -H "Content-Type: text/plain" \
+                  -d "$UPDATE_TOKEN" \
+                  --max-time 10
+              )
+            - |
+              if [[ $response == 2* ]]; then
+                echo "Token sent successfully"
+              else
+                echo "Failed to send token. HTTP status code: $response"; exit 1;
+              fi
+            - |
+              scheme=$(
+                curl -sS -o /dev/null -w "%{scheme}" --insecure "$SERVER_ADDRESS"
+              )
+            - |
+              if [[ $scheme != "https" ]]; then
+                echo "Warning: Server is not using HTTPS. Communication is not encrypted."
+              fi
