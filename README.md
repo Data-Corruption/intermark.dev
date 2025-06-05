@@ -12,7 +12,7 @@ Intermark gives you exactly that. No plugins. No magic.
 * Markdown or HTML, mixed freely
 * TailwindCSS and DaisyUI prewired
 * Search, themes, and sidebar editing built-in
-* Go backend, ~4k LOC, no frameworks
+* Go backend, ~4k LOC, minimal framework
 
 <br>
 
