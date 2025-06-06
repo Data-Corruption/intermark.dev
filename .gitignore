@@ -8,5 +8,7 @@ public/.meta/search-index.json
 public/.meta/search-pre-index.json
 public/.meta/app.dist.css
 
-.vscode/
+.vscode/*
+!.vscode/launch.json
+
 node_modules/

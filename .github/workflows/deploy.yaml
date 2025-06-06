@@ -16,18 +16,18 @@ jobs:
       - name: Tell server to update its content
         run: |
           set +x
-          if [ -z "${{ vars.SERVER_ADDRESS }}" ]; then
-            echo "Warning: SERVER_ADDRESS is not set or is empty"
+          if [ -z "${{ vars.IM_SERVER_ADDRESS }}" ]; then
+            echo "Warning: IM_SERVER_ADDRESS is not set or is empty"
             exit 0
           fi
-          if [ -z "${{ secrets.UPDATE_TOKEN }}" ]; then
-            echo "Warning: UPDATE_TOKEN is not set or is empty"
+          if [ -z "${{ secrets.IM_UPDATE_SECRET }}" ]; then
+            echo "Warning: IM_UPDATE_SECRET is not set or is empty"
             exit 0
           fi
 
-          response=$(curl -X POST -sS -o /dev/null -w "%{http_code}" --insecure ${{ vars.SERVER_ADDRESS }}/update \
+          response=$(curl -X POST -sS -o /dev/null -w "%{http_code}" --insecure ${{ vars.IM_SERVER_ADDRESS }}/update \
           -H "Content-Type: text/plain" \
-          -d "${{ secrets.UPDATE_TOKEN }}" \
+          -d "${{ secrets.IM_UPDATE_SECRET }}" \
           --max-time 10)
           
           if [[ $response == 2* ]]; then
@@ -37,6 +37,6 @@ jobs:
             exit 1
           fi
           
-          if [[ $(curl -sS -o /dev/null -w "%{scheme}" --insecure ${{ vars.SERVER_ADDRESS }}) != "https" ]]; then
+          if [[ $(curl -sS -o /dev/null -w "%{scheme}" --insecure ${{ vars.IM_SERVER_ADDRESS }}) != "https" ]]; then
             echo "Warning: Server is not using HTTPS. Communication is not encrypted."
           fi

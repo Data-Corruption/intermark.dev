@@ -9,7 +9,6 @@ import (
 	"regexp"
 	"strings"
 
-	"intermark/go/config"
 	"intermark/go/system"
 
 	"github.com/Data-Corruption/rlog/logger"
@@ -242,13 +241,10 @@ func ensureGitDir(repoDirPath string) error {
 
 // helper func for setting git ssh command
 func getENV(ctx context.Context) []string {
-	if !config.GetData(ctx).UseSshKey {
-		return os.Environ()
-	}
 	// ensure the SSH key exists
 	if _, err := os.Stat(filepath.Join(os.Getenv("HOME"), ".ssh", "id_ed25519_intermark")); err != nil {
 		if os.IsNotExist(err) {
-			logger.Errorf(ctx, "SSH key not found at ~/.ssh/id_ed25519_intermark, please ensure it exists")
+			logger.Debug(ctx, "SSH key not found at ~/.ssh/id_ed25519_intermark, please ensure it exists")
 			return os.Environ()
 		}
 		logger.Errorf(ctx, "issue checking SSH key: %v", err)

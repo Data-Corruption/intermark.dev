@@ -6,18 +6,18 @@ pipelines:
       - step:
           name: Deploy
           script:
-            - if [ -z "$SERVER_ADDRESS" ]; then
-                echo "Warning: SERVER_ADDRESS is not set or is empty"; exit 0;
+            - if [ -z "$IM_SERVER_ADDRESS" ]; then
+                echo "Warning: IM_SERVER_ADDRESS is not set or is empty"; exit 0;
               fi
-            - if [ -z "$UPDATE_TOKEN" ]; then
-                echo "Warning: UPDATE_TOKEN is not set or is empty"; exit 0;
+            - if [ -z "$IM_UPDATE_SECRET" ]; then
+                echo "Warning: IM_UPDATE_SECRET is not set or is empty"; exit 0;
               fi
             - |
               response=$(
                 curl -X POST -sS -o /dev/null -w "%{http_code}" --insecure \
-                  "$SERVER_ADDRESS/update" \
+                  "$IM_SERVER_ADDRESS/update" \
                   -H "Content-Type: text/plain" \
-                  -d "$UPDATE_TOKEN" \
+                  -d "$IM_UPDATE_SECRET" \
                   --max-time 10
               )
             - |
@@ -28,7 +28,7 @@ pipelines:
               fi
             - |
               scheme=$(
-                curl -sS -o /dev/null -w "%{scheme}" --insecure "$SERVER_ADDRESS"
+                curl -sS -o /dev/null -w "%{scheme}" --insecure "$IM_SERVER_ADDRESS"
               )
             - |
               if [[ $scheme != "https" ]]; then
@@ -40,18 +40,18 @@ pipelines:
       - step:
           name: Deploy (manual)
           script:
-            - if [ -z "$SERVER_ADDRESS" ]; then
-                echo "Warning: SERVER_ADDRESS is not set or is empty"; exit 0;
+            - if [ -z "$IM_SERVER_ADDRESS" ]; then
+                echo "Warning: IM_SERVER_ADDRESS is not set or is empty"; exit 0;
               fi
-            - if [ -z "$UPDATE_TOKEN" ]; then
-                echo "Warning: UPDATE_TOKEN is not set or is empty"; exit 0;
+            - if [ -z "$IM_UPDATE_SECRET" ]; then
+                echo "Warning: IM_UPDATE_SECRET is not set or is empty"; exit 0;
               fi
             - |
               response=$(
                 curl -X POST -sS -o /dev/null -w "%{http_code}" --insecure \
-                  "$SERVER_ADDRESS/update" \
+                  "$IM_SERVER_ADDRESS/update" \
                   -H "Content-Type: text/plain" \
-                  -d "$UPDATE_TOKEN" \
+                  -d "$IM_UPDATE_SECRET" \
                   --max-time 10
               )
             - |
@@ -62,7 +62,7 @@ pipelines:
               fi
             - |
               scheme=$(
-                curl -sS -o /dev/null -w "%{scheme}" --insecure "$SERVER_ADDRESS"
+                curl -sS -o /dev/null -w "%{scheme}" --insecure "$IM_SERVER_ADDRESS"
               )
             - |
               if [[ $scheme != "https" ]]; then

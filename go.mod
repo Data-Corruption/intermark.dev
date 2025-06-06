@@ -6,10 +6,8 @@ toolchain go1.24.1
 
 require (
 	github.com/Data-Corruption/rlog v1.3.0
-	github.com/altcha-org/altcha-lib-go v0.1.3
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/minio/sha256-simd v1.0.1
-	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/yuin/goldmark v1.7.11
 	golang.org/x/net v0.40.0
 )

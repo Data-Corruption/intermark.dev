@@ -33,6 +33,7 @@ func main() {
 		run("npm", "install")
 		fmt.Println("🟢 Dependencies installed.")
 		gitAddLFS()
+		checkGitLFS()
 	case "clean":
 		clean()
 	case "build":
@@ -139,7 +140,7 @@ func gitAddLFS() {
 	// Append the LFS line if missing
 	for _, l := range lines {
 		if l == attrLine {
-			fmt.Println("🟢 .gitattributes already contains LFS settings.")
+			fmt.Println("🟢 .gitattributes is configured for LFS.")
 			return
 		}
 	}
@@ -151,5 +152,45 @@ func gitAddLFS() {
 		fmt.Fprintf(os.Stderr, "🔴 Failed to write .gitattributes for LFS: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Println("🟢 Updated .gitattributes for LFS.")
+	fmt.Println("🟢 .gitattributes is configured for LFS.")
+}
+
+func checkGitLFS() {
+	// should work on all platforms
+	_, err := exec.LookPath("git-lfs")
+	if err != nil {
+		fmt.Println("🔴 Git LFS was not detected on your system.")
+		fmt.Println("You can install it as follows:")
+		switch runtime.GOOS {
+		case "darwin":
+			fmt.Println("  • macOS (with Homebrew):")
+			fmt.Println("      brew install git-lfs")
+			fmt.Println("    Then run: git lfs install")
+		case "linux":
+			fmt.Println("  • Debian/Ubuntu:")
+			fmt.Println("      sudo apt-get update && sudo apt-get install git-lfs")
+			fmt.Println("    Then run: git lfs install")
+			fmt.Println()
+			fmt.Println("  • Fedora/CentOS (with dnf/yum):")
+			fmt.Println("      sudo dnf install git-lfs  # or sudo yum install git-lfs")
+			fmt.Println("    Then run: git lfs install")
+			fmt.Println()
+			fmt.Println("  • From the official binary (all distros):")
+			fmt.Println("      curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash")
+			fmt.Println("      sudo apt-get install git-lfs  # or sudo yum install git-lfs")
+			fmt.Println("    Then run: git lfs install")
+		case "windows":
+			fmt.Println("  • Windows (using Chocolatey):")
+			fmt.Println("      choco install git-lfs")
+			fmt.Println("    Then run: git lfs install")
+			fmt.Println()
+			fmt.Println("  • Or download the Windows installer:")
+			fmt.Println("      https://github.com/git-lfs/git-lfs/releases")
+			fmt.Println("    and run the .msi, then open a new terminal and run: git lfs install")
+		default:
+			fmt.Println("  • Visit https://git-lfs.github.com/ for your platform and follow the instructions there.")
+		}
+		return
+	}
+	fmt.Println("🟢 Found Git LFS")
 }

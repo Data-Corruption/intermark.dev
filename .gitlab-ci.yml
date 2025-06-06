@@ -12,21 +12,21 @@ deploy:
   stage: deploy
   image: alpine:latest
   variables:
-    SERVER_ADDRESS: $SERVER_ADDRESS   # Set in Settings → CI/CD → Variables
-    UPDATE_TOKEN: $UPDATE_TOKEN       # Set as a protected variable
+    IM_SERVER_ADDRESS: $IM_SERVER_ADDRESS   # Set in Settings → CI/CD → Variables
+    IM_UPDATE_SECRET: $IM_UPDATE_SECRET       # Set as a protected variable
   script:
-    - if [ -z "$SERVER_ADDRESS" ]; then
-        echo "Warning: SERVER_ADDRESS is not set or is empty"; exit 0;
+    - if [ -z "$IM_SERVER_ADDRESS" ]; then
+        echo "Warning: IM_SERVER_ADDRESS is not set or is empty"; exit 0;
       fi
-    - if [ -z "$UPDATE_TOKEN" ]; then
-        echo "Warning: UPDATE_TOKEN is not set or is empty"; exit 0;
+    - if [ -z "$IM_UPDATE_SECRET" ]; then
+        echo "Warning: IM_UPDATE_SECRET is not set or is empty"; exit 0;
       fi
     - |
       response=$(
         curl -X POST -sS -o /dev/null -w "%{http_code}" --insecure \
-          "$SERVER_ADDRESS/update" \
+          "$IM_SERVER_ADDRESS/update" \
           -H "Content-Type: text/plain" \
-          -d "$UPDATE_TOKEN" \
+          -d "$IM_UPDATE_SECRET" \
           --max-time 10
       )
     - |
@@ -37,7 +37,7 @@ deploy:
       fi
     - |
       scheme=$(
-        curl -sS -o /dev/null -w "%{scheme}" --insecure "$SERVER_ADDRESS"
+        curl -sS -o /dev/null -w "%{scheme}" --insecure "$IM_SERVER_ADDRESS"
       )
     - |
       if [[ $scheme != "https" ]]; then

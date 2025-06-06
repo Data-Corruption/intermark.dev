@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
-	"intermark/go/config"
+	"intermark/go/env"
 	"intermark/go/flags"
 	"intermark/go/router"
 	"intermark/go/server"
@@ -19,20 +21,12 @@ import (
 func main() {
 	ctx := context.Background()
 
-	// init config
-	cfg, err := config.New("./public/.meta/config.toml")
-	if err != nil {
-		fmt.Println("Error loading config:", err)
-		os.Exit(1)
-	}
-	ctx = config.IntoContext(ctx, cfg)
-
 	// init logger
-	level := config.GetData(ctx).LogLevel
+	level := env.Get(env.IM_LOG_LEVEL)
 	if flags.PresentAny("-v", "--verbose") {
 		level = "debug"
 	}
-	debugMode := level == "debug"
+	debug := level == "debug"
 	log, err := logger.New("logs", level)
 	if err != nil {
 		fmt.Println("Error creating logger:", err)
@@ -41,7 +35,7 @@ func main() {
 	defer log.Close()
 	ctx = logger.IntoContext(ctx, log)
 	// set up auto flush every 5 seconds if level is debug
-	if debugMode {
+	if debug {
 		go func() {
 			for {
 				time.Sleep(5 * time.Second)
@@ -77,26 +71,46 @@ func main() {
 	}
 	log.Infof("Tailwind version: %s", tVer)
 
-	maxPageCacheBytes := int64(config.GetData(ctx).PageCacheMB) * 1024 * 1024
-	maxAssetCacheBytes := int64(config.GetData(ctx).AssetCacheMB) * 1024 * 1024
-	log.Debugf("Max page cache size: %d bytes", maxPageCacheBytes)
-	log.Debugf("Max asset cache size: %d bytes", maxAssetCacheBytes)
+	// get page cache size
+	pc := env.Get(env.IM_PAGE_CACHE_MB)
+	ipc, err := strconv.ParseInt(pc, 10, 64)
+	if err != nil {
+		exit("Error parsing IM_PAGE_CACHE_MB environment variable, must be an integer", err, log)
+	}
+	ipc = ipc * 1024 * 1024 // convert to bytes
+	log.Debugf("IM_PAGE_CACHE_MB: %d", ipc)
+
+	// get asset cache size
+	ac := env.Get(env.IM_ASSET_CACHE_MB)
+	iac, err := strconv.ParseInt(ac, 10, 64)
+	if err != nil {
+		exit("Error parsing IM_ASSET_CACHE_MB environment variable, must be an integer", err, log)
+	}
+	iac = iac * 1024 * 1024 // convert to bytes
+	log.Debugf("IM_ASSET_CACHE_MB: %d", iac)
+
+	edit := flags.PresentAny("-e", "--edit")
 
 	// create router
-	r, err := router.New(ctx, maxPageCacheBytes, maxAssetCacheBytes)
+	r, err := router.New(ctx, ipc, iac, edit, debug)
 	if err != nil {
 		exit("Error creating router, see logs for details", err, log)
 	}
 
+	// get address
+	addr := env.Get(env.IM_ADDRESS)
+	if !strings.HasPrefix(addr, ":") {
+		exit("IM_ADDRESS environment variable must start with a colon (e.g. ':9292')", nil, log)
+	}
+
 	// start server
-	addr := config.GetData(ctx).Addr
 	log.Infof("Starting server on %s", addr)
 	srv, err := server.New(&server.Config{
 		Handler: r.Router,
 		Addr:    addr,
 		OnListen: func() {
 			fmt.Println("Server listening on http://localhost" + addr)
-			if flags.PresentAny("-e", "--edit") {
+			if edit {
 				fmt.Println("Edit layout at http://localhost" + addr + "/edit")
 			}
 		},
