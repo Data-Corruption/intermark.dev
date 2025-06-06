@@ -97,7 +97,7 @@ func updateIm() {
 	if err != nil {
 		if bytes.Contains(output, []byte("CONFLICT")) {
 			fmt.Println("🟡 Merge completed, but there are conflicts. “CONFLICT” markers have been added to your files.")
-			fmt.Println("Please open your preferred merge editor (e.g. `git mergetool`) to resolve them, then `git add` and `git commit`.")
+			fmt.Println("Please open your preferred merge editor (e.g. `git mergetool`) to resolve them.")
 			return
 		}
 		log.Fatalf("🔴 Merge failed: %v\nOutput: %s", err, output)
