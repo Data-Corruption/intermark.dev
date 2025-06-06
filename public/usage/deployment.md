@@ -142,6 +142,10 @@ As stated above, if you're using Cloudflare and not transmitting sensitive data,
 
 ---
 
+## Updating Intermark
+
+---
+
 You're all set! Your Intermark site should now be live and secure. Push changes to your repo and watch them manifest on your site automatically. <3
 
 <script>
