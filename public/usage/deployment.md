@@ -12,47 +12,62 @@ Clone the repository to your server. Ensure the server has Git, Go, and Node ins
 
 ---
 
+## Configuration
+
+Intermark uses environment variables for configuration. Here is a full list of the variables you can set:
+
+- **IM_ADDRESS**: The port your Intermark server will run on. Default is `:9292`.
+- **IM_PAGE_CACHE_MB**: The size of the page cache in megabytes. Default is `1024` (1GB).
+- **IM_ASSET_CACHE_MB**: The size of the asset cache in megabytes. Default is `1024` (1GB).
+- **IM_LOG_LEVEL**: The log level. `debug`, `info`, `warn`, `error`, `none`. Default is `warn`.
+- **IM_UPDATE_SECRET**: A secret string used to authenticate update requests from your GitHub Actions workflow. This is explained in the Continuous Deployment section below.
+
+You can also set minute based timeouts for actions:
+
+- **IM_GIT_M**: Fetch, pull, etc. Default is `5`.
+- **IM_LFS_M**: LFS operations. Default is `5`.
+- **IM_TAIL_M**: Tailwindcss built. Default is `1`.
+- **IM_LUNR_M**: Lunr.js index build. Default is `1`.
+
+You might need to change LFS if you have huge files, and Tailwind/Lunr if you have large sites. Otherwise this is mainly just to prevent the server from getting stuck if something goes wrong.
+
+### Setting Environment Variables
+
+For an example, we'll change the address. First, check which shell you’re using:
+
+```sh
+echo $SHELL
+```
+
+Then run one of these:
+
+- **For Bash** (`/bin/bash`):
+
+  ```sh
+  echo 'export IM_ADDRESS=":9393"' >> ~/.bashrc && source ~/.bashrc
+  ```
+
+- **For Zsh** (`/bin/zsh`):
+
+  ```sh
+  echo 'export IM_ADDRESS=":9393"' >> ~/.zshrc && source ~/.zshrc
+  ```
+
 ## Continuous Deployment
 
-### 1. Workflow Variables
+### 1. Workflow Setup
 
-The `IM_UPDATE_SECRET` var is used by the workflow on main pushes to authenticate update requests to your server.
+Generate a random string, here's an easy method:
 
-- **1.1 - Generate a random string, here’s an easy way to do it**:
+```sh
+openssl rand -base64 32
+```
 
-  ```sh
-  openssl rand -base64 32
-  ```
+Set the `IM_UPDATE_SECRET` environment variable to this string. Then, go to your repository settings and set the workflows vars:
 
-- **1.2 - Make it a permanent env**:
-
-  First, check which shell you’re using:
-
-  ```sh
-  echo $SHELL
-  ```
-
-  Then run one of these:
-
-  - **For Bash** (`/bin/bash`):
-
-    ```sh
-    echo 'export INTERMARK_UPDATE_SECRET="your-generated-secret-here"' >> ~/.bashrc
-    source ~/.bashrc
-    ```
-
-  - **For Zsh** (`/bin/zsh`):
-
-    ```sh
-    echo 'export INTERMARK_UPDATE_SECRET="your-generated-secret-here"' >> ~/.zshrc
-    source ~/.zshrc
-    ```
-
-- **1.3 - In your Repository settings, add the update secret and server url**:
-
-  - Go to **Settings** > **Secrets and variables** > **Actions**.
-  - **New repository secret**, Name it `IM_UPDATE_SECRET`, paste the generated secret.
-  - **New repository secret**, Name it `IM_SERVER_ADDRESS`, paste your server url/domain
+- Go to **Settings** > **Secrets and variables** > **Actions**.
+- **New repository secret**, Name it `IM_UPDATE_SECRET`, paste the secret string.
+- **New repository secret**, Name it `IM_SERVER_ADDRESS`, paste your server url/domain
 
 ---
 
@@ -60,20 +75,20 @@ The `IM_UPDATE_SECRET` var is used by the workflow on main pushes to authenticat
 
 !!! **Skip the following if your repo is public** !!!
 
-- **2.1 - Generate a ssh key pair**:
+Generate a key pair:
   
-  **When prompted for a password, Do Not Set One, just hit enter.**
+**When prompted for a password, Do Not Set One, just hit enter.**
   
-  <div id="ssh_gen"></div>
+<div id="ssh_gen"></div>
 
-- **2.2 - In your Repository settings, add the key**:
+In your Repository settings, add the key:
 
-  - Go to **Settings** > **Deploy keys**.
-  - **Add deploy key**
-    - Title it something like "Intermark Deployment Key".
-    - Paste the public key you just generated into the **Key** field. Here is a command to print the pub key for easy copying:
+- Go to **Settings** > **Deploy keys**.
+- **Add deploy key**
+  - Title it something like "Intermark Deployment Key".
+  - Paste the public key you just generated into the **Key** field. Here is a command to print the pub key for easy copying:
 
-      <div id="ssh_copy"></div>
+    <div id="ssh_copy"></div>
 
 ---
 
@@ -85,7 +100,7 @@ If you have a domain, log into your domain registrar (e.g., Namecheap, GoDaddy, 
 - **Name**: @ (or your subdomain, e.g. `www`)
 - **Value**: Your server's public IP
 
-Use `dig` or `nslookup` to verify DNS propagation:
+Use `dig` or `nslookup` to verify it's working:
 
 <div id="dns_check"></div>
 
@@ -123,7 +138,7 @@ Visit `http://yourdomain.com` in your browser. You should see your Intermark sit
 
 ## TLS (https)
 
-Follow [these](https://certbot.eff.org/instructions?ws=nginx&os=pip) steps to secure your site with TLS. _Note: this does involve installing python/pip, but it's well worth it for the free auto renewing TLS cert._
+As stated above, if you're using Cloudflare and not transmitting sensitive data, you can skip this step. Otherwise, if you want to secure your site with end to end TLS, follow [these](https://certbot.eff.org/instructions?ws=nginx&os=pip) steps.
 
 ---
 

@@ -57,8 +57,7 @@ func main() {
 			run("git", "remote", "add", "upstream", upstreamRepo)
 		}
 		run("git", "fetch", "upstream")
-		run("git", "merge", "--ff-only", "upstream/main")
-		run("git", "merge", "upstream/main")
+		run("git", "merge", "--allow-unrelated-histories", "upstream/main")
 	default:
 		fmt.Println("Unknown command:", cmd)
 		os.Exit(1)

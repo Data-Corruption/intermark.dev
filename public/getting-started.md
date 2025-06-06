@@ -18,21 +18,19 @@ _For Node.js on windows, I recommend using the **Windows Installer (.msi)**, not
 
 ### Forking the Repository
 
-On your preferred Git platform (GitHub, GitLab, etc.) fork the [Intermark repository](https://github.com/Data-Corruption/intermark) (On Github use the template feature), clone it to your local machine, and open it in a terminal.
-
-If you want / need to manually fork:
-
 <div id="fork_code"></div>
+
+If using GitHub, you can also use their "Fork" or "Use this template" button instead. Then clone that repo to your local machine.
 
 ---
 
 ### Setup
 
-Run the following command to install dependencies and setup LFS:
+Run the following command in the project root to install dependencies and setup LFS:
 
 <div id="setup_code"></div>
 
-If you are unsure if you already ran this command, you can run it again. It wont cause any issues.
+If you are unsure if you already ran this command, you can run it multiple times without issues.
 
 ---
 
@@ -50,8 +48,8 @@ Use this mode locally to preview your site as you write, and edit the sidebar wi
 
 This mode builds everything with various optimizations during:
 
-- Initial startup
-- On updates when you push to the main branch of your repo
+- Startup
+- Pushes to `main` branch of your forked repository
 
 To start Intermark in Production Mode, run:
 
@@ -67,7 +65,7 @@ To start Intermark in Production Mode, run:
 <script>
   window.addEventListener('load', () => {
     const fork_code =
-`git clone https://github.com/Data-Corruption/Intermark.git
+`git clone https://github.com/Data-Corruption/intermark.git
 cd intermark
 # After creating a repo on your preferred platform, e.g. Github,
 # set it as the remote and push your changes
