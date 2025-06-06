@@ -58,8 +58,8 @@ Generate a random string, here's an easy method:
 Set the `IM_UPDATE_SECRET` environment variable to this string. Then, go to your repository settings and set the workflows vars:
 
 - Go to **Settings** > **Secrets and variables** > **Actions**.
-- **New repository secret**, Name it `IM_UPDATE_SECRET`, paste the secret string.
-- **New repository secret**, Name it `IM_SERVER_ADDRESS`, paste your server url/domain
+- **New repository secret**, name: `IM_UPDATE_SECRET`, value: secret string.
+- **New repository variable**, name: `IM_SERVER_ADDRESS`, value: server url/domain
 
 ---
 
