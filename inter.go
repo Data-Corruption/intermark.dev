@@ -90,16 +90,17 @@ func updateIm() {
 
 	run("git", "fetch", "upstream")
 
-	mergeArgs := []string{"git", "merge", "--allow-unrelated-histories", "upstream/main"}
+	mergeArgs := []string{"merge", "--allow-unrelated-histories", "upstream/main"}
 
-	output, err := exec.Command("git", mergeArgs...).CombinedOutput()
+	cmd := exec.Command("git", mergeArgs...)
+	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if bytes.Contains(output, []byte("CONFLICT")) {
 			fmt.Println("🟡 Merge completed, but there are conflicts. “CONFLICT” markers have been added to your files.")
 			fmt.Println("Please open your preferred merge editor (e.g. `git mergetool`) to resolve them, then `git add` and `git commit`.")
 			return
 		}
-		log.Fatal("🔴 Failed to merge upstream/main")
+		log.Fatalf("🔴 Merge failed: %v\nOutput: %s", err, output)
 	}
 
 	fmt.Println("🟢 Merge succeeded with no conflicts.")
