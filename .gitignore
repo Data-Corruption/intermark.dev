@@ -3,10 +3,10 @@ bin/
 logs/
 todo.md
 assets/css/out.css
-public/.meta/dist/
-public/.meta/search-index.json
-public/.meta/search-pre-index.json
-public/.meta/app.dist.css
+
+public/.meta/*
+!public/.meta/app.css
+!public/.meta/layout.json
 
 .vscode/*
 !.vscode/launch.json
