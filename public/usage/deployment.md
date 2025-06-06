@@ -35,23 +35,17 @@ You might need to change LFS if you have huge files, and Tailwind/Lunr if you ha
 
 For an example, we'll change the address. First, check which shell you’re using:
 
-```sh
-echo $SHELL
-```
+<div id="check_shell"></div>
 
 Then run one of these:
 
 - **For Bash** (`/bin/bash`):
 
-  ```sh
-  echo 'export IM_ADDRESS=":9393"' >> ~/.bashrc && source ~/.bashrc
-  ```
+  <div id="set_bash_env"></div>
 
 - **For Zsh** (`/bin/zsh`):
 
-  ```sh
-  echo 'export IM_ADDRESS=":9393"' >> ~/.zshrc && source ~/.zshrc
-  ```
+  <div id="set_zsh_env"></div>
 
 ## Continuous Deployment
 
@@ -59,9 +53,7 @@ Then run one of these:
 
 Generate a random string, here's an easy method:
 
-```sh
-openssl rand -base64 32
-```
+<div id="secret_gen"></div>
 
 Set the `IM_UPDATE_SECRET` environment variable to this string. Then, go to your repository settings and set the workflows vars:
 
@@ -144,6 +136,12 @@ As stated above, if you're using Cloudflare and not transmitting sensitive data,
 
 ## Updating Intermark
 
+To merge changes from the main Intermark repository into your fork you can run:
+
+<div id="update_intermark"></div>
+
+This will fetch the latest changes from the Intermark repository and merge them into your fork. You can then address conflicts with your editor of choice, commit the changes, and push them to your fork.
+
 ---
 
 You're all set! Your Intermark site should now be live and secure. Push changes to your repo and watch them manifest on your site automatically. <3
@@ -164,6 +162,9 @@ You're all set! Your Intermark site should now be live and secure. Push changes 
     }
 }`;
 
+    codeBlock('check_shell', 'echo $SHELL', 'sh');
+    codeBlock('set_bash_env', 'echo \'export IM_ADDRESS=":9393"\' >> ~/.bashrc && source ~/.bashrc', 'sh');
+    codeBlock('set_zsh_env', 'echo \'export IM_ADDRESS=":9393"\' >> ~/.zshrc && source ~/.zshrc', 'sh');
     codeBlock('secret_gen', 'openssl rand -base64 32', 'sh');
     codeBlock('ssh_gen', 'ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_intermark', 'sh');
     codeBlock('ssh_copy', 'cat ~/.ssh/id_ed25519_intermark.pub', 'sh');
@@ -174,5 +175,6 @@ You're all set! Your Intermark site should now be live and secure. Push changes 
     codeBlock('nginx_2_enable', `sudo nginx -t && sudo systemctl reload nginx`, 'sh');
     codeBlock('nginx_config', nginx_config, 'nginx');
     codeBlock('edit_mode', `go run ./inter.go prod`, 'sh');
+    codeBlock('update_intermark', 'go run inter.go update_intermark', 'sh');
   });
 </script>
