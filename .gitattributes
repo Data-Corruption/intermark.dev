@@ -1,1 +1,12 @@
 assets/js/lunr.js linguist-detectable=false
+
+# auto-merge settings
+public/** merge=ours
+assets/** merge=ours
+assets/js/** merge=default
+.gitattributes merge=ours
+.gitignore merge=ours
+README.md merge=ours
+package.json merge=ours
+package-lock.json merge=ours
+LICENSE merge=ours

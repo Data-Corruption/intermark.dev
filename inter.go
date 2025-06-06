@@ -5,7 +5,9 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -48,17 +50,7 @@ func main() {
 		build()
 		run(binOut())
 	case "update_intermark":
-		confirm := prompt("🟡  This will fetch & merge upstream/main(intermark) into your current branch. Continue? [y/N] ")
-		if confirm != "y" && confirm != "Y" {
-			fmt.Println("Update aborted.")
-			return
-		}
-		if !gitRemoteExists("upstream") {
-			run("git", "remote", "add", "upstream", upstreamRepo)
-		}
-		run("git", "fetch", "upstream")
-		run("git", "merge", "--ff-only", "upstream/main")
-		run("git", "merge", "upstream/main")
+		updateIm()
 	default:
 		fmt.Println("Unknown command:", cmd)
 		os.Exit(1)
@@ -84,6 +76,33 @@ func binOut() string {
 		ext = ".exe"
 	}
 	return filepath.Join(binDir, binName+ext)
+}
+
+func updateIm() {
+	confirm := prompt("🟡  This will fetch & merge upstream/main(intermark) into your current branch. Continue? [y/N] ")
+	if confirm != "y" && confirm != "Y" {
+		fmt.Println("Update aborted.")
+		return
+	}
+	if !gitRemoteExists("upstream") {
+		run("git", "remote", "add", "upstream", upstreamRepo)
+	}
+
+	run("git", "fetch", "upstream")
+
+	mergeArgs := []string{"git", "merge", "--allow-unrelated-histories", "upstream/main"}
+
+	output, err := exec.Command("git", mergeArgs...).CombinedOutput()
+	if err != nil {
+		if bytes.Contains(output, []byte("CONFLICT")) {
+			fmt.Println("🟡 Merge completed, but there are conflicts. “CONFLICT” markers have been added to your files.")
+			fmt.Println("Please open your preferred merge editor (e.g. `git mergetool`) to resolve them, then `git add` and `git commit`.")
+			return
+		}
+		log.Fatal("🔴 Failed to merge upstream/main")
+	}
+
+	fmt.Println("🟢 Merge succeeded with no conflicts.")
 }
 
 func run(name string, args ...string) {
