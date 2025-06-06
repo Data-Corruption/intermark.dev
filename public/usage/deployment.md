@@ -1,53 +1,83 @@
 # Deployment
 
-_Note: This guide assumes the server you're hosting on is linux and the git repo platform github. I can add more example but honestly just show this one to an llm and ask about how do do it on your platform. Like with all llm usage it's probs wrong and outdated but a decent starting point for research_
+_Note: This guide assumes your server is linux and your repo is on github._
+
+_Other Note: I highly recommend using Cloudflare for your domain, you can buy one, point it to your server, and get TLS no setup needed. Perfect for public sites that don't transmit personal data. If you need free end to end encryption, see the TLS section at the bottom of this page._
 
 ---
 
-## 1. Clone To Server
+## Clone To Server
 
-After writing content, previewing it locally using `go run .\inter.go edit`, and pushing to your repo, clone the repository to your server. Ensure the server has Git, Go, and Node.js installed.
-
----
-
-## 2. Generate Auth Keys
-
-### Update Secret
-
-This will be included in update requests sent by the repo workflow on pushes to main. This is so only update requests from the repo can update the site. Here is a quick way to generate one, any random string will do:
-
-<div id="secret_gen"></div>
-
-Here's the big reveal... My evil marketing lied, there is a config file! muhahahaha. Copy that string to the `update-secret` field in `./public/.meta/config.toml`. This is used to verify that update requests are coming from the repo workflow.
-
-Now in your Repository settings, add the secret.
-
-- Go to **Settings** > **Secrets and variables** > **Actions**.
-- **New repository secret**, Name it `UPDATE_TOKEN`, paste that shit in there.
-
-While you're here, add the url of your server. If you bought a domain (recommended), use that.
-
-- **New repository secret**, Name it `SERVER_ADDRESS`, paste the url/domain
-
-### Deploy Key
-
-This will allow Intermark to pull from private repos. **Skip this step if your repo is public.**
-
-First, gen a ssh key pair. **When prompted for a password, Do Not Set One, just hit enter.**
-
-<div id="ssh_gen"></div>
-
-Then in your Repository settings, add the key.
-
-- Go to **Settings** > **Deploy keys**, Click **Add deploy key**.
-- Enter a title (e.g., "Prod Deployment Key").
-- Paste the public key you just generated into the **Key** field. Here is a command to print the pub key for easy copying:
-
-<div id="ssh_copy"></div>
+Clone the repository to your server. Ensure the server has Git, Go, and Node installed. Run the setup command, same as when you first made your fork and set it up locally.
 
 ---
 
-## 4. Point Your Domain to Your Server
+## Continuous Deployment
+
+### 1. Workflow Variables
+
+The `IM_UPDATE_SECRET` var is used by the workflow on main pushes to authenticate update requests to your server.
+
+- **1.1 - Generate a random string, here’s an easy way to do it**:
+
+  ```sh
+  openssl rand -base64 32
+  ```
+
+- **1.2 - Make it a permanent env**:
+
+  First, check which shell you’re using:
+
+  ```sh
+  echo $SHELL
+  ```
+
+  Then run one of these:
+
+  - **For Bash** (`/bin/bash`):
+
+    ```sh
+    echo 'export INTERMARK_UPDATE_SECRET="your-generated-secret-here"' >> ~/.bashrc
+    source ~/.bashrc
+    ```
+
+  - **For Zsh** (`/bin/zsh`):
+
+    ```sh
+    echo 'export INTERMARK_UPDATE_SECRET="your-generated-secret-here"' >> ~/.zshrc
+    source ~/.zshrc
+    ```
+
+- **1.3 - In your Repository settings, add the update secret and server url**:
+
+  - Go to **Settings** > **Secrets and variables** > **Actions**.
+  - **New repository secret**, Name it `IM_UPDATE_SECRET`, paste the generated secret.
+  - **New repository secret**, Name it `IM_SERVER_ADDRESS`, paste your server url/domain
+
+---
+
+### 2. SSH Deploy Key
+
+!!! **Skip the following if your repo is public** !!!
+
+- **2.1 - Generate a ssh key pair**:
+  
+  **When prompted for a password, Do Not Set One, just hit enter.**
+  
+  <div id="ssh_gen"></div>
+
+- **2.2 - In your Repository settings, add the key**:
+
+  - Go to **Settings** > **Deploy keys**.
+  - **Add deploy key**
+    - Title it something like "Intermark Deployment Key".
+    - Paste the public key you just generated into the **Key** field. Here is a command to print the pub key for easy copying:
+
+      <div id="ssh_copy"></div>
+
+---
+
+## Point Domain To Server
 
 If you have a domain, log into your domain registrar (e.g., Namecheap, GoDaddy, Cloudflare) and set the **A Record**:
 
@@ -63,14 +93,14 @@ You should see your server's IP returned.
 
 ---
 
-## 5. Setup NGINX as a Reverse Proxy with TLS
+## Setup NGINX
 
-### Install NGINX
+### Install
 
 <div id="nginx_1_install"></div>
 <div id="nginx_2_install"></div>
 
-### Create Basic HTTP Reverse Proxy
+### Create Site Configuration
 
 Create a new NGINX configuration file for your site at `/etc/nginx/sites-available/yourdomain.com`:
 
@@ -91,7 +121,7 @@ Visit `http://yourdomain.com` in your browser. You should see your Intermark sit
 
 ---
 
-## 6. Secure Site with Certbot + Let's Encrypt
+## TLS (https)
 
 Follow [these](https://certbot.eff.org/instructions?ws=nginx&os=pip) steps to secure your site with TLS. _Note: this does involve installing python/pip, but it's well worth it for the free auto renewing TLS cert._
 

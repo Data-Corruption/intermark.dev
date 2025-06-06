@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strings"
 
-	"intermark/go/config"
+	"intermark/go/env"
 	"intermark/go/files"
 	"intermark/go/flags"
 	"intermark/go/html"
@@ -97,7 +97,8 @@ func isURLSafePath(path string) bool {
 
 // Update adds missing items to the layout sidebar and removes ones that are not in the filesystem.
 func (l *Layout) Update(ctx context.Context) error {
-	if config.GetData(ctx).LogLevel == "debug" { // check to avoid $$$ l.Debug()
+	debug := env.Get(env.IM_LOG_LEVEL) == "debug"
+	if debug { // check to avoid $$$ l.Debug()
 		logger.Debugf(ctx, "Pre Update Layout:\n\n%s\n", l.Debug())
 	}
 
@@ -179,7 +180,7 @@ func (l *Layout) Update(ctx context.Context) error {
 		return err
 	}
 
-	if config.GetData(ctx).LogLevel == "debug" {
+	if debug {
 		logger.Debugf(ctx, "Tree:\n\n%s\n", func() string {
 			out := ""
 			for k, v := range tree {
@@ -220,7 +221,7 @@ func (l *Layout) Update(ctx context.Context) error {
 	}
 	normalize(root)
 	l.Sidebar = root.Children
-	if config.GetData(ctx).LogLevel == "debug" { // check to avoid $$$ l.Debug()
+	if debug { // check to avoid $$$ l.Debug()
 		logger.Debugf(ctx, "Post Update Layout:\n\n%s\n", l.Debug())
 	}
 
@@ -255,7 +256,7 @@ func (l *Layout) Update(ctx context.Context) error {
 			"Layout":   l,
 			"Themes":   themes.All,
 			"EditMode": flags.PresentAny("-e", "--edit"),
-			"Debug":    config.GetData(ctx).LogLevel == "debug",
+			"Debug":    debug,
 		})
 		if err != nil {
 			return fmt.Errorf("error converting footer markdown to html: %w", err)

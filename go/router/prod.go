@@ -10,11 +10,12 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"intermark/go/config"
+	"intermark/go/env"
 	"intermark/go/files"
 	"intermark/go/html"
 	"intermark/go/layout"
@@ -110,7 +111,7 @@ func (r *Router) setupProdRoutes() error {
 			return
 		}
 		// get token from env
-		token := os.Getenv(UPDATE_TOKEN_KEY)
+		token := env.Get(env.IM_UPDATE_SECRET)
 		if token == "" {
 			http.Error(res, "Update token not set", http.StatusInternalServerError)
 			return
@@ -162,24 +163,21 @@ func (r *Router) Update() error {
 	}
 
 	// fetch
-	fTimeout := config.GetData(r.ctx).Timeouts.Fetch
-	fCtx, fCancel := context.WithTimeout(r.ctx, time.Duration(fTimeout)*time.Second)
+	fCtx, fCancel := context.WithTimeout(r.ctx, getTimeout(env.IM_GIT_M))
 	defer fCancel()
 	if err := git.Fetch(fCtx, cwd, "main"); err != nil {
 		return fmt.Errorf("error fetching latest changes: %w", err)
 	}
 
 	// reset
-	rTimeout := config.GetData(r.ctx).Timeouts.Reset
-	rCtx, rCancel := context.WithTimeout(r.ctx, time.Duration(rTimeout)*time.Second)
+	rCtx, rCancel := context.WithTimeout(r.ctx, getTimeout(env.IM_GIT_M))
 	defer rCancel()
 	if err := git.Reset(rCtx, cwd, "main", true); err != nil {
 		return fmt.Errorf("error resetting to latest changes: %w", err)
 	}
 
 	// lsf pull
-	lTimeout := config.GetData(r.ctx).Timeouts.Lfs
-	lCtx, lCancel := context.WithTimeout(r.ctx, time.Duration(lTimeout)*time.Second)
+	lCtx, lCancel := context.WithTimeout(r.ctx, getTimeout(env.IM_LFS_M))
 	defer lCancel()
 	if err := git.LfsPull(lCtx, cwd); err != nil {
 		return fmt.Errorf("error pulling LFS files: %w", err)
@@ -382,8 +380,7 @@ func (r *Router) genDist() error {
 	}
 
 	// run lunrjs to generate search index
-	lTimeout := config.GetData(r.ctx).Timeouts.Lunr
-	lCtx, lCancel := context.WithTimeout(r.ctx, time.Duration(lTimeout)*time.Second)
+	lCtx, lCancel := context.WithTimeout(r.ctx, getTimeout(env.IM_LUNR_M))
 	defer lCancel()
 	if r.searchIdx, r.searchHash, err = lunrjs.Run(lCtx, &docs); err != nil {
 		return fmt.Errorf("error running lunrjs: %w", err)
@@ -399,4 +396,12 @@ func (r *Router) genDist() error {
 	}
 
 	return nil
+}
+
+func getTimeout(s string) time.Duration {
+	m, err := strconv.ParseUint(env.Get(s), 10, 64)
+	if err != nil {
+		return time.Duration(10) * time.Minute // fallback to 10 minutes if parsing fails
+	}
+	return time.Duration(m) * time.Minute
 }

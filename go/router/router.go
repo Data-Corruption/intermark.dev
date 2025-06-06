@@ -11,12 +11,9 @@ import (
 	"path/filepath"
 	"sync"
 	"sync/atomic"
-	"time"
 
-	"intermark/go/captcha"
-	"intermark/go/config"
+	"intermark/go/env"
 	"intermark/go/files"
-	"intermark/go/flags"
 	"intermark/go/layout"
 	"intermark/go/system/tailwind"
 	"intermark/go/templates"
@@ -26,10 +23,7 @@ import (
 	"github.com/minio/sha256-simd"
 )
 
-const (
-	DIST_CM_KEY      = "INTERMARK_DIST_COMMIT_KEY" // used in diff checks, set after pull/update
-	UPDATE_TOKEN_KEY = "INTERMARK_UPDATE_TOKEN_KEY"
-)
+const DIST_CM_KEY = "INTERMARK_DIST_COMMIT_KEY" // used in diff checks, set after pull/update
 
 //go:embed updating.html
 var updatingPage []byte
@@ -57,7 +51,7 @@ type Router struct {
 	editMu sync.RWMutex
 }
 
-func New(ctx context.Context, pageCacheBytes, assetCacheBytes int64) (*Router, error) {
+func New(ctx context.Context, pageCacheBytes, assetCacheBytes int64, edit, debug bool) (*Router, error) {
 	r := &Router{
 		Router:        chi.NewRouter(),
 		templates:     nil,
@@ -66,8 +60,8 @@ func New(ctx context.Context, pageCacheBytes, assetCacheBytes int64) (*Router, e
 		assetCache:    files.NewLRU(true, assetCacheBytes),
 		assHashToPath: make(map[string]string),
 		assPathToHash: make(map[string]string),
-		editMode:      flags.PresentAny("-e", "--edit"),
-		debugMode:     config.GetData(ctx).LogLevel == "debug",
+		editMode:      edit,
+		debugMode:     debug,
 		ctx:           ctx,
 		log:           logger.FromContext(ctx),
 	}
@@ -87,8 +81,6 @@ func New(ctx context.Context, pageCacheBytes, assetCacheBytes int64) (*Router, e
 			})
 		})
 	}
-
-	captcha.Setup(r.Router)
 
 	// edit asset serving / prod fallback
 	r.Router.Get("/assets/*", func(res http.ResponseWriter, req *http.Request) {
@@ -119,8 +111,7 @@ func (r *Router) loadTemplates() error {
 }
 
 func (r *Router) RunTailwind() error {
-	tTimeout := config.GetData(r.ctx).Timeouts.Tail
-	tCtx, tCancel := context.WithTimeout(r.ctx, time.Duration(tTimeout)*time.Second)
+	tCtx, tCancel := context.WithTimeout(r.ctx, getTimeout(env.IM_TAIL_M))
 	defer tCancel()
 
 	// run tailwind

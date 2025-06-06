@@ -12,25 +12,27 @@ Before you begin, ensure you have the following installed on your system:
 
 [**Git**](https://git-scm.com/downloads), [**Go**](https://go.dev/doc/install), and [**Node.js**](https://nodejs.org/en/download)
 
-_For Node.js on windows, I recommend using the **Windows Installer (.msi)**, not the powershell script. Say yes to npm and adding to path if prompted_
+_For Node.js on windows, I recommend using the **Windows Installer (.msi)**, not the powershell script. Also say yes to `npm` and `add to path` if prompted during the wizard_
 
 ---
 
 ### Forking the Repository
 
-On your preferred Git platform (GitHub, GitLab, etc.) fork the Intermark repository (On Github use the template feature), clone it to your local machine, and open it in a terminal.
+On your preferred Git platform (GitHub, GitLab, etc.) fork the [Intermark repository](https://github.com/Data-Corruption/intermark) (On Github use the template feature), clone it to your local machine, and open it in a terminal.
 
-If you want / need to manually fork for whatever reason:
+If you want / need to manually fork:
 
 <div id="fork_code"></div>
 
 ---
 
-### Dependencies
+### Setup
 
-Run the following command to install dependencies (go modules and tail/daisyui):
+Run the following command to install dependencies and setup LFS:
 
-<div id="deps_code"></div>
+<div id="setup_code"></div>
+
+If you are unsure if you already ran this command, you can run it again. It wont cause any issues.
 
 ---
 
@@ -73,7 +75,7 @@ git remote add origin "your-repo-url"
 git push -u origin main`;
 
     codeBlock('fork_code', fork_code, 'sh');
-    codeBlock('deps_code', 'go run inter.go deps', 'sh');
+    codeBlock('setup_code', 'go run inter.go setup', 'sh');
     codeBlock('edit_code', 'go run inter.go edit', 'sh');
     codeBlock('prod_code', 'go run inter.go prod', 'sh');
   });

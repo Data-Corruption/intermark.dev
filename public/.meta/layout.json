@@ -19,6 +19,19 @@
     {
       "Type": "file",
       "Icon": "",
+      "Label": "Contributing",
+      "Bold": false,
+      "Template": "page-nav-side-toc.html",
+      "Collapsed": false,
+      "DisableCollapse": false,
+      "Link": "/p/contributing",
+      "Path": "contributing.md",
+      "Position": 2,
+      "Children": null
+    },
+    {
+      "Type": "file",
+      "Icon": "",
       "Label": "Getting Started",
       "Bold": false,
       "Template": "page-nav-side-toc.html",
@@ -26,7 +39,7 @@
       "DisableCollapse": false,
       "Link": "/p/getting-started",
       "Path": "getting-started.md",
-      "Position": 2,
+      "Position": 3,
       "Children": null
     },
     {
@@ -39,7 +52,7 @@
       "DisableCollapse": true,
       "Link": "",
       "Path": "usage",
-      "Position": 3,
+      "Position": 4,
       "Children": [
         {
           "Type": "file",
@@ -79,33 +92,20 @@
           "Path": "usage/deployment.md",
           "Position": 3,
           "Children": null
-        },
-        {
-          "Type": "file",
-          "Icon": "",
-          "Label": "Advanced Features",
-          "Bold": false,
-          "Template": "page-nav-side-toc.html",
-          "Collapsed": false,
-          "DisableCollapse": false,
-          "Link": "/p/usage/advanced-features",
-          "Path": "usage/advanced-features.md",
-          "Position": 4,
-          "Children": null
         }
       ]
     },
     {
-      "Type": "file",
+      "Type": "divider",
       "Icon": "",
-      "Label": "Contributing",
+      "Label": "",
       "Bold": false,
-      "Template": "page-nav-side-toc.html",
+      "Template": "",
       "Collapsed": false,
       "DisableCollapse": false,
-      "Link": "/p/contributing",
-      "Path": "contributing.md",
-      "Position": 4,
+      "Link": "",
+      "Path": "",
+      "Position": 5,
       "Children": null
     },
     {
@@ -116,9 +116,9 @@
       "Template": "",
       "Collapsed": false,
       "DisableCollapse": false,
-      "Link": "https://github.com/Data-Corruption/Intermark",
+      "Link": "https://github.com/Data-Corruption/intermark",
       "Path": "",
-      "Position": 5,
+      "Position": 6,
       "Children": null
     },
     {
@@ -131,7 +131,7 @@
       "DisableCollapse": false,
       "Link": "https://discord.gg/K2rrvBmVgD",
       "Path": "",
-      "Position": 6,
+      "Position": 7,
       "Children": null
     }
   ]
