@@ -3,17 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
-	"strconv"
-	"strings"
-	"time"
-
 	"intermark/go/env"
 	"intermark/go/flags"
 	"intermark/go/router"
 	"intermark/go/server"
 	"intermark/go/system/git"
 	"intermark/go/system/tailwind"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/Data-Corruption/rlog/logger"
 )
@@ -90,6 +89,14 @@ func main() {
 	log.Debugf("IM_ASSET_CACHE_MB: %d", iac)
 
 	edit := flags.PresentAny("-e", "--edit")
+
+	if !edit && env.Get(env.IM_UPDATE_SECRET) == "" {
+		fmt.Println("")
+		fmt.Println("Warning: IM_UPDATE_SECRET environment variable is not set. This is required for automatic updates to work.")
+		fmt.Println("See https://intermark.dev/p/usage/deployment for more information.")
+		fmt.Println("")
+		log.Warn("IM_UPDATE_SECRET environment variable is not set. This is required for automatic updates to work.")
+	}
 
 	// create router
 	r, err := router.New(ctx, ipc, iac, edit, debug)
