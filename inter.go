@@ -15,7 +15,7 @@ import (
 
 const (
 	binDir       = "bin"
-	upstreamRepo = "https://github.com/Data-Corruption/Intermark.git"
+	upstreamRepo = "https://github.com/Data-Corruption/intermark.git"
 	binName      = "intermark"
 	goMainPath   = "./go/main"
 )
