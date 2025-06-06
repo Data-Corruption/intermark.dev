@@ -1,0 +1,42 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Tell server to update its content
+        run: |
+          set +x
+          if [ -z "${{ vars.IM_SERVER_ADDRESS }}" ]; then
+            echo "Warning: IM_SERVER_ADDRESS is not set or is empty"
+            exit 0
+          fi
+          if [ -z "${{ secrets.IM_UPDATE_SECRET }}" ]; then
+            echo "Warning: IM_UPDATE_SECRET is not set or is empty"
+            exit 0
+          fi
+
+          response=$(curl -X POST -sS -o /dev/null -w "%{http_code}" --insecure ${{ vars.IM_SERVER_ADDRESS }}/update \
+          -H "Content-Type: text/plain" \
+          -d "${{ secrets.IM_UPDATE_SECRET }}" \
+          --max-time 10)
+          
+          if [[ $response == 2* ]]; then
+            echo "Token sent successfully"
+          else
+            echo "Failed to send token. HTTP status code: $response"
+            exit 1
+          fi
+          
+          if [[ $(curl -sS -o /dev/null -w "%{scheme}" --insecure ${{ vars.IM_SERVER_ADDRESS }}) != "https" ]]; then
+            echo "Warning: Server is not using HTTPS. Communication is not encrypted."
+          fi

@@ -1,0 +1,45 @@
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: always
+
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  image: alpine:latest
+  variables:
+    IM_SERVER_ADDRESS: $IM_SERVER_ADDRESS   # Set in Settings → CI/CD → Variables
+    IM_UPDATE_SECRET: $IM_UPDATE_SECRET       # Set as a protected variable
+  script:
+    - if [ -z "$IM_SERVER_ADDRESS" ]; then
+        echo "Warning: IM_SERVER_ADDRESS is not set or is empty"; exit 0;
+      fi
+    - if [ -z "$IM_UPDATE_SECRET" ]; then
+        echo "Warning: IM_UPDATE_SECRET is not set or is empty"; exit 0;
+      fi
+    - |
+      response=$(
+        curl -X POST -sS -o /dev/null -w "%{http_code}" --insecure \
+          "$IM_SERVER_ADDRESS/update" \
+          -H "Content-Type: text/plain" \
+          -d "$IM_UPDATE_SECRET" \
+          --max-time 10
+      )
+    - |
+      if [[ $response == 2* ]]; then
+        echo "Token sent successfully"
+      else
+        echo "Failed to send token. HTTP status code: $response"; exit 1;
+      fi
+    - |
+      scheme=$(
+        curl -sS -o /dev/null -w "%{scheme}" --insecure "$IM_SERVER_ADDRESS"
+      )
+    - |
+      if [[ $scheme != "https" ]]; then
+        echo "Warning: Server is not using HTTPS. Communication is not encrypted."
+      fi
